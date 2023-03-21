@@ -1,0 +1,7 @@
+[tasks.watch]
+description = "Start the app on Docker"
+command = "cargo"
+args = ["watch", "-x", "run"]
+
+[tasks.w]
+alias = "watch"
