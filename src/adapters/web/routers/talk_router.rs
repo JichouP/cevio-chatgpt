@@ -1,4 +1,4 @@
-use axum::{routing::post, Router};
+use axum::{routing::get, Router};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -12,5 +12,5 @@ pub fn talk_router() -> Router<Arc<RwLock<ChatGPTService<ChatGPTImpl>>>> {
 }
 
 fn talk_routes() -> Router<Arc<RwLock<ChatGPTService<ChatGPTImpl>>>> {
-    Router::new().route("/", post(post_talk))
+    Router::new().route("/", get(post_talk))
 }

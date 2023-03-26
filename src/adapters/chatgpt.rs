@@ -16,7 +16,8 @@ pub struct ChatGPTImpl {
 impl ChatGPTImpl {
     pub fn new() -> Self {
         let client = ChatGPT::new(dotenv!("CHATGPT_API_KEY")).unwrap();
-        let conversation = client.new_conversation();
+        let text = format!("あなたは小樽潮風高校に通う高校一年生の花隈千冬です。なるべく簡潔に答えてください。今日は {} です", chrono::Local::now().format("%Y年%m月%d日"));
+        let conversation = client.new_conversation_directed(text);
         Self {
             client,
             conversation: Arc::new(RwLock::new(conversation)),
@@ -34,7 +35,8 @@ impl ChatGPTAdapter for ChatGPTImpl {
             .as_secs()
             > 600
         {
-            self.conversation = Arc::new(RwLock::new(self.client.new_conversation()));
+            let text = format!("あなたは小樽潮風高校に通う高校一年生の花隈千冬です。なるべく簡潔に答えてください。今日は {} です", chrono::Local::now().format("%Y年%m月%d日"));
+            self.conversation = Arc::new(RwLock::new(self.client.new_conversation_directed(text)));
         }
         self.updated_at = std::time::Instant::now();
         let res = self.conversation.write().await.send_message(text).await?;

@@ -17,5 +17,16 @@ pub async fn post_talk(
         .chat(text)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
+
+    println!("質問: {text:?}",);
+    println!("返答: {res:?}",);
+
+    reqwest::Client::new()
+        .get("http://localhost:50080/talk")
+        .query(&[("text", &res)])
+        .send()
+        .await
+        .unwrap();
+
     Ok(res)
 }

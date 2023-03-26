@@ -139,6 +139,7 @@ dependencies = [
  "anyhow",
  "axum",
  "chatgpt_rs",
+ "chrono",
  "dotenv",
  "dotenv_codegen",
  "reqwest",
