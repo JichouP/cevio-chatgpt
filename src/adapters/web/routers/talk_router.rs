@@ -1,11 +1,16 @@
 use axum::{routing::post, Router};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
-use crate::adapters::web::controllers::talk_controller::post_talk;
+use crate::{
+    adapters::{chatgpt::ChatGPTImpl, web::controllers::talk_controller::post_talk},
+    application::services::chatgpt::ChatGPTService,
+};
 
-pub fn talk_router() -> Router {
+pub fn talk_router() -> Router<Arc<RwLock<ChatGPTService<ChatGPTImpl>>>> {
     Router::new().nest("/talk", talk_routes())
 }
 
-fn talk_routes() -> Router {
+fn talk_routes() -> Router<Arc<RwLock<ChatGPTService<ChatGPTImpl>>>> {
     Router::new().route("/", post(post_talk))
 }

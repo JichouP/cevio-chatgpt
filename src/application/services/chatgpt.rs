@@ -1,9 +1,9 @@
+use anyhow::Result;
 use axum::async_trait;
-use chatgpt::err::Error;
 
 #[async_trait]
 pub trait ChatGPTAdapter {
-    async fn chat(&mut self, text: &str) -> Result<String, Error>;
+    async fn chat(&mut self, text: &str) -> Result<String>;
 }
 
 #[derive(Debug, Clone)]
@@ -16,7 +16,7 @@ impl<T: ChatGPTAdapter> ChatGPTService<T> {
         Self { chatgpt_adapter }
     }
 
-    pub async fn chat(&mut self, text: &str) -> Result<String, Error> {
+    pub async fn chat(&mut self, text: &str) -> Result<String> {
         self.chatgpt_adapter.chat(text).await
     }
 }

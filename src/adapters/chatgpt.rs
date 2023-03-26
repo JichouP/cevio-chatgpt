@@ -1,14 +1,15 @@
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
 use crate::application::services::chatgpt::ChatGPTAdapter;
+use anyhow::Result;
 use axum::async_trait;
-use chatgpt::{
-    err::Error,
-    prelude::{ChatGPT, Conversation},
-};
+use chatgpt::prelude::{ChatGPT, Conversation};
 
 #[derive(Clone)]
 pub struct ChatGPTImpl {
     client: ChatGPT,
-    conversation: Conversation,
+    conversation: Arc<RwLock<Conversation>>,
     updated_at: std::time::Instant,
 }
 
@@ -18,7 +19,7 @@ impl ChatGPTImpl {
         let conversation = client.new_conversation();
         Self {
             client,
-            conversation,
+            conversation: Arc::new(RwLock::new(conversation)),
             updated_at: std::time::Instant::now(),
         }
     }
@@ -26,17 +27,17 @@ impl ChatGPTImpl {
 
 #[async_trait]
 impl ChatGPTAdapter for ChatGPTImpl {
-    async fn chat(&mut self, text: &str) -> Result<String, Error> {
+    async fn chat(&mut self, text: &str) -> Result<String> {
         // If more than 600 seconds have passed, create a new chat
         if std::time::Instant::now()
             .duration_since(self.updated_at)
             .as_secs()
             > 600
         {
-            self.conversation = self.client.new_conversation();
+            self.conversation = Arc::new(RwLock::new(self.client.new_conversation()));
         }
         self.updated_at = std::time::Instant::now();
-        let res = self.conversation.send_message(text).await?;
+        let res = self.conversation.write().await.send_message(text).await?;
         Ok(res.message().content.clone())
     }
 }

@@ -7,6 +7,7 @@ use axum::{
     Router,
 };
 use std::sync::Arc;
+use tokio::sync::RwLock;
 use tower::ServiceBuilder;
 
 #[macro_use]
@@ -18,10 +19,10 @@ mod application;
 #[tokio::main]
 async fn main() {
     let chatgpt_adapter = ChatGPTImpl::new();
-    let chatgpt_state = Arc::new(ChatGPTService::new(chatgpt_adapter));
+    let chatgpt_state = Arc::new(RwLock::new(ChatGPTService::new(chatgpt_adapter)));
     let app: Router = Router::new()
-        .with_state(chatgpt_state)
         .nest("/", talk_router())
+        .with_state(chatgpt_state)
         .layer(ServiceBuilder::new().layer(from_fn(access_log_on_request)));
 
     let addr = format!("0.0.0.0:{}", dotenv!("PORT"));
